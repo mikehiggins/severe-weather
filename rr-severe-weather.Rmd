@@ -1,0 +1,79 @@
+---
+title: "RR - Severe Weather Events"
+author: "Mike Higgins"
+date: "4 July 2016"
+output: html_document
+---
+
+###Synopsis
+This is the synopsis.
+
+### Data Processing
+There should be a section titled Data Processing which describes (in words and code) how the data were loaded into R and processed for analysis. In particular, your analysis must start from the raw CSV file containing the data. You cannot do any preprocessing outside the document. If preprocessing is time-consuming you may consider using the 𝚌𝚊𝚌𝚑𝚎 = 𝚃𝚁𝚄𝙴 option for certain code chunks.
+
+Extract the file and make sure to cache this for performance reasons
+
+```{r, cache=TRUE}
+sourceFile <- "repdata%2Fdata%2FStormData.csv.bz2"
+
+df <- read.csv(sourceFile)
+
+str(df)
+
+```
+
+
+```{r}
+# here is where we process the dataframe to make it more usable
+
+# Convert date + time columns to a single POSIX date-time column
+df$BGN_DATE <- as.POSIXct(df$BGN_DATE, format="%m/%d/%Y %H:%M:%S")
+df$BGN_DT <- as.POSIXct(paste(df$BGN_DATE, df$BGN_TIME), format="%Y-%m-%d %H%M")
+
+df$END_DATE <- as.POSIXct(df$END_DATE, format="%m/%d/%Y %H:%M:%S")
+df$END_DT <- as.POSIXct(paste(df$END_DATE, df$END_TIME), format="%Y-%m-%d %H%M")
+
+# Convert damage values to decimal number
+conv <- function(x,y) {
+  
+  x <- as.numeric(x);
+  
+  if(y == "K") {
+    return(x * 1000)
+  }
+  else if (y == "M") {
+    return(x * 1000000)
+  }
+  else {
+    return(x)
+  }
+  
+}
+
+
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### Results
+
+Should include at least one and no more than 3 charts or figures
+
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
