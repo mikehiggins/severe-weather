@@ -2,3 +2,5 @@ repdata%2Fdata%2FStormData.csv
 repdata%2Fdata%2FStormData.csv.bz2
 rr-severe-weather_cache
 rr-severe-weather_files
+.RDataTmp
+.RData
