@@ -22,10 +22,9 @@ str(df)
 
 ```
 
-
-```{r}
-# here is where we process the dataframe to make it more usable
-
+Once we have the file loaded into a dataframe, we can go to work preparing and
+processing some of the data to make it more usable.
+```{r, cache=TRUE}
 # Convert date + time columns to a single POSIX date-time column
 df$BGN_DATE <- as.POSIXct(df$BGN_DATE, format="%m/%d/%Y %H:%M:%S")
 df$BGN_DT <- as.POSIXct(paste(df$BGN_DATE, df$BGN_TIME), format="%Y-%m-%d %H%M")
@@ -33,7 +32,7 @@ df$BGN_DT <- as.POSIXct(paste(df$BGN_DATE, df$BGN_TIME), format="%Y-%m-%d %H%M")
 df$END_DATE <- as.POSIXct(df$END_DATE, format="%m/%d/%Y %H:%M:%S")
 df$END_DT <- as.POSIXct(paste(df$END_DATE, df$END_TIME), format="%Y-%m-%d %H%M")
 
-# Convert damage values to decimal number
+# function to convert damage values to numeric column
 conv <- function(x,y) {
   
   x <- as.numeric(x);
@@ -50,7 +49,10 @@ conv <- function(x,y) {
   
 }
 
+# Create new column of the dollar values
+df$PROPDMGVAL <- mapply(conv, df$PROPDMG, df$PROPDMGEXP)
 
+df$CROPDMGVAL <- mapply(conv, df$CROPDMG, df$CROPDMGEXP)
 
 ```
 
@@ -58,7 +60,35 @@ conv <- function(x,y) {
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## What are we trying to understand?
+1. Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?
 
+- Perhaps we could aggregate deaths and fatalities by EVTYPE and see what the chart 
+looks like?
+
+
+```{r}
+propVal <- aggregate(x=df$PROPDMGVAL, by=list(df$EVTYPE), FUN = "sum")
+names(propVal) <- c("EVTYPE", "DMGVAL")
+
+cropVal <- aggregate(x=df$CROPDMGVAL, by=list(df$EVTYPE), FUN = "sum")
+names(cropVal) <- c("EVTYPE", "DMGVAL")
+```
+
+
+2. Across the United States, which types of events have the greatest economic consequences?
+- Perhaps we could aggregate Damage Values by EVTYPE and see what the chart 
+looks like?
+
+```{r}
+# aggregate number of deaths over various event types
+deaths <- aggregate(x=df$FATALITIES, by=list(df$EVTYPE), FUN = "sum")
+names(deaths) <- c("EVTYPE", "val")
+
+# aggregate number of injuries over various event types
+injuries <- aggregate(x=df$INJURIES, by=list(df$EVTYPE), FUN = "sum")
+names(injuries) <- c("EVTYPE", "val")
+```
 ### Results
 
 Should include at least one and no more than 3 charts or figures

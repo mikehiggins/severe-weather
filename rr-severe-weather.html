@@ -173,14 +173,58 @@ str(df)</code></pre>
 ##  $ LONGITUDE_: num  8806 0 0 0 0 ...
 ##  $ REMARKS   : Factor w/ 436781 levels &quot;&quot;,&quot;\t&quot;,&quot;\t\t&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
 ##  $ REFNUM    : num  1 2 3 4 5 6 7 8 9 10 ...</code></pre>
+<p>Once we have the file loaded into a dataframe, we can go to work preparing and processing some of the data to make it more usable.</p>
+<pre class="r"><code># Convert date + time columns to a single POSIX date-time column
+df$BGN_DATE &lt;- as.POSIXct(df$BGN_DATE, format=&quot;%m/%d/%Y %H:%M:%S&quot;)
+df$BGN_DT &lt;- as.POSIXct(paste(df$BGN_DATE, df$BGN_TIME), format=&quot;%Y-%m-%d %H%M&quot;)
+
+df$END_DATE &lt;- as.POSIXct(df$END_DATE, format=&quot;%m/%d/%Y %H:%M:%S&quot;)
+df$END_DT &lt;- as.POSIXct(paste(df$END_DATE, df$END_TIME), format=&quot;%Y-%m-%d %H%M&quot;)
+
+# function to convert damage values to numeric column
+conv &lt;- function(x,y) {
+  
+  x &lt;- as.numeric(x);
+  
+  if(y == &quot;K&quot;) {
+    return(x * 1000)
+  }
+  else if (y == &quot;M&quot;) {
+    return(x * 1000000)
+  }
+  else {
+    return(x)
+  }
+  
+}
+
+# Create new column of the dollar values
+df$PROPDMGVAL &lt;- mapply(conv, df$PROPDMG, df$PROPDMGEXP)
+
+df$CROPDMGVAL &lt;- mapply(conv, df$CROPDMG, df$CROPDMGEXP)</code></pre>
 </div>
+<div id="what-are-we-trying-to-understand" class="section level2">
+<h2>What are we trying to understand?</h2>
+<ol style="list-style-type: decimal">
+<li>Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?</li>
+</ol>
+<ul>
+<li>Perhaps we could aggregate deaths and fatalities by EVTYPE and see what the chart looks like?</li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li>Across the United States, which types of events have the greatest economic consequences?</li>
+</ol>
+<ul>
+<li>Perhaps we could aggregate Damage Values by EVTYPE and see what the chart looks like?</li>
+</ul>
+<pre class="r"><code>propVal &lt;- aggregate(x=df$PROPDMGVAL, by=list(df$EVTYPE), FUN = &quot;sum&quot;)
+names(propVal) &lt;- c(&quot;EVTYPE&quot;, &quot;DMGVAL&quot;)
+
+cropVal &lt;- aggregate(x=df$CROPDMGVAL, by=list(df$EVTYPE), FUN = &quot;sum&quot;)
+names(cropVal) &lt;- c(&quot;EVTYPE&quot;, &quot;DMGVAL&quot;)</code></pre>
 <div id="results" class="section level3">
 <h3>Results</h3>
-</div>
-<div id="r-markdown" class="section level2">
-<h2>R Markdown</h2>
-<p>This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <a href="http://rmarkdown.rstudio.com" class="uri">http://rmarkdown.rstudio.com</a>.</p>
-<p>When you click the <strong>Knit</strong> button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
+<p>Should include at least one and no more than 3 charts or figures</p>
 <pre class="r"><code>summary(cars)</code></pre>
 <pre><code>##      speed           dist       
 ##  Min.   : 4.0   Min.   :  2.00  
@@ -189,6 +233,7 @@ str(df)</code></pre>
 ##  Mean   :15.4   Mean   : 42.98  
 ##  3rd Qu.:19.0   3rd Qu.: 56.00  
 ##  Max.   :25.0   Max.   :120.00</code></pre>
+</div>
 </div>
 <div id="including-plots" class="section level2">
 <h2>Including Plots</h2>
